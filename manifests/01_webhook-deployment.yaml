@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hypercloud5-server
+  namespace: hypercloud5-system
+  labels:
+    hypercloud5: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      hypercloud5: server
+  template:
+    metadata:
+      labels:
+        hypercloud5: server
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: ck4-1
+      containers:
+      - name: hypercloud5-server
+        image: hypercloud-server:5.0
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+           memory: "1Gi"
+           cpu: "500m"
+          limits:
+           memory: "1Gi"
+           cpu: "500m"
+        env:
+        - name: TZ
+          value: "Asia/Seoul"
+        ports:
+        - containerPort: 80
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hypercloud5-webhook-svc
+  namespace: hypercloud5-system
+spec:
+  type: NodePort
+  selector:
+    hypercloud5: server
+  ports:
+    - port: 80
+      targetPort: http
